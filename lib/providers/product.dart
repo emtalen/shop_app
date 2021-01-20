@@ -24,7 +24,7 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus() async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
@@ -41,7 +41,6 @@ class Product with ChangeNotifier {
         _setFavValue(oldStatus);
       }
     } catch (error) {
-      isFavorite = oldStatus;
       _setFavValue(oldStatus);
     }
   }
