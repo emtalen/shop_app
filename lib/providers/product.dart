@@ -34,6 +34,11 @@ class Product with ChangeNotifier {
       final response = await http.put(
         url,
         body: json.encode({
+          'id': id,
+          'title': title,
+          'description': description,
+          'price': price,
+          'imageUrl': imageUrl,
           'isFavorite': isFavorite,
         }),
       );
