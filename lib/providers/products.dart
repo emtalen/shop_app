@@ -41,8 +41,9 @@ class Products with ChangeNotifier {
   ];
 
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -57,7 +58,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    final url =
+    var url =
         'https://flutterlearning-9fe4d-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
@@ -65,6 +66,10 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      url =
+          'https://flutterlearning-9fe4d-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -73,7 +78,8 @@ class Products with ChangeNotifier {
             title: prodData['title'],
             price: prodData['price'],
             imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isFavorite']));
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false));
       });
       _items = loadedProducts;
       notifyListeners();
@@ -95,7 +101,7 @@ class Products with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
-            'isFavorite': product.isFavorite
+            'creatorId': userId,
           },
         ),
       );
@@ -119,7 +125,7 @@ class Products with ChangeNotifier {
       final url =
           'https://flutterlearning-9fe4d-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken';
       try {
-        await http.put(
+        await http.patch(
           url,
           body: json.encode({
             'title': newProduct.title,
